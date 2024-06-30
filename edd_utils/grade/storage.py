@@ -3,24 +3,19 @@ from pathlib import Path
 
 from contextlib import contextmanager
 from ..tests import Test
-from .types import GetColumnNames
 
 
 class GraderStorage:
     "TSV storage for grader results"
 
-    def __init__(self, storage_path: Path, tests: list[Test], get_columns_names: GetColumnNames) -> None:
+    def __init__(self, storage_path: Path, tests: list[Test], columns_names: list[str]) -> None:
         self.storage_path = storage_path
         self.tests = tests
-        self.get_columns_names = get_columns_names
+        self.column_names = columns_names
 
         if not self.storage_path.exists():
             with self.get_writer("w") as writer:
                 writer.writerow(self.column_names)
-
-    @property
-    def column_names(self):
-        return self.get_columns_names([test.key for test in self.tests])
 
     @contextmanager
     def get_writer(self, mode="a"):

@@ -48,19 +48,13 @@ def test_sorter(group: str, name: str):
     return groups_values[group], name
 
 
-grader = Grader(
-    assignment="T3-2024-1",
-    dirs_name="T3",
-    config=grader_config,
-    test_sorter=test_sorter,
-    submissions_path=Path("alumnos.tsv"),
-)
-
+grader = Grader(assignment="T3-2024-1", dirs_name="T3", test_sorter=test_sorter, config=grader_config)
+grader.load_submissions(Path("submissions.tsv"))
 
 runner = InputOutputRunner(timeout=10, mbs_limit=1024)
 
-for submission in grader.submissions:
-    if submission.has_run():
+for submission in grader.iter_submissions():
+    if submission.is_saved():
         continue
 
     last_test_that_worked = None
@@ -96,8 +90,9 @@ for submission in grader.submissions:
         output_path.unlink(missing_ok=True)
 
     if last_test_that_worked:
-        valgrind_result = check_leaks_and_memory_errors(last_test_that_worked, cwd=submission.repo_path)
-        if valgrind_result is not None:
-            leaks_ok, mem_ok = valgrind_result
+        try:
+            leaks_ok, mem_ok = check_leaks_and_memory_errors(last_test_that_worked, cwd=submission.repo_path)
             submission.save_result("ok leaks", int(leaks_ok))
             submission.save_result("ok mem_errors", int(mem_ok))
+        except Exception as e:
+            print(f"Error al revisar leaks y memory errors de {submission.user}")

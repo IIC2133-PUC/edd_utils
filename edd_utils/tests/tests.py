@@ -15,7 +15,8 @@ class SupportComparison(Protocol[_T]):
 StrSortKey: TypeAlias = Callable[[str, str], SupportComparison]
 
 
-def get_tests(test_dir: Path, test_sorter: StrSortKey | None = None):
+def get_sorted_tests(test_dir: Path, test_sorter: StrSortKey | None = None):
+    "Get al tests in the format <test-group>/<test-name>"
     tests: list[Test] = []
     for group in test_dir.iterdir():
         if not group.is_dir():

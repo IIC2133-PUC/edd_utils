@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import csv
 
 from .. import git
-from ..tests import get_tests, StrSortKey
+from ..tests import get_sorted_tests, StrSortKey
 from .types import GetColumnNames
 from .storage import GraderStorage
 
@@ -21,7 +21,6 @@ class Grader:
         self,
         assignment: str,
         dirs_name: str,
-        submissions_path: Path,
         *,
         config: GraderConfig,
         storage_path: Path | None = None,
@@ -30,22 +29,21 @@ class Grader:
         self.assignment = assignment
         self.dirs_name = dirs_name
         self.config = config
-        self.tests = get_tests(self.config.tests_dir / dirs_name, test_sorter)
+        self.submissions: list[Submission] = []
+
+        self.tests = get_sorted_tests(self.config.tests_dir / dirs_name, test_sorter)
 
         storage_path = storage_path or Path(f"{assignment}.tsv")
-        self.storage = GraderStorage(storage_path, self.tests, self.config.get_columns_names)
-        self.submissions = self.__get_submissions(submissions_path)
+        columns_names = self.config.get_columns_names([test.key for test in self.tests])
+        self.storage = GraderStorage(storage_path, self.tests, columns_names)
 
-    def __get_submissions(self, submissions_path: Path):
+    def load_submissions(self, submissions_path: Path):
         reader = csv.reader(submissions_path.open(), delimiter="\t")
-        submissions: list[Submission] = []
         for row in reader:
             if len(row) == 1:
-                submission = Submission(row[0], None, grader=self)
+                self.submissions.append(Submission(row[0], None, grader=self))
             else:
-                submission = Submission(row[0], row[1], grader=self)
-            submissions.append(submission)
-        return submissions
+                self.submissions.append(Submission(row[0], row[1], grader=self))
 
     @property
     def repos_path(self):
@@ -78,7 +76,7 @@ class Submission:
     def repo_full_name(self):
         return f"{self.grader.config.github_org}/{self.repo_name}"
 
-    def has_run(self):
+    def is_saved(self):
         return self.grader.storage.has_user(self.user)
 
     def save_result(self, key, value):

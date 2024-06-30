@@ -1,7 +1,7 @@
 from pathlib import Path
 import subprocess
 
-from edd_utils.tests import get_tests
+from edd_utils.tests import get_sorted_tests
 from edd_utils.run import InputOutputRunner, ResultOk, ResultError, check_leaks_and_memory_errors
 from edd_utils import make
 
@@ -20,7 +20,7 @@ def test_sorter(group: str, name: str):
 runner = InputOutputRunner(timeout=10, mbs_limit=1024)
 this_dir = Path.cwd()
 
-tests = get_tests(this_dir / "tests")
+tests = get_sorted_tests(this_dir / "tests")
 
 
 compile(this_dir)
@@ -42,13 +42,12 @@ for test in tests:
     output_path.unlink(missing_ok=True)
 
 if last_test_that_worked:
-    valgrind_result = check_leaks_and_memory_errors(last_test_that_worked, cwd=this_dir)
-    if valgrind_result is not None:
-        leaks_ok, mem_ok = valgrind_result
+    try:
+        leaks_ok, mem_ok = check_leaks_and_memory_errors(last_test_that_worked, cwd=this_dir)
         print(f"Leak check: {leaks_ok}")
         print(f"Memory check: {mem_ok}")
-    elif valgrind_result is None:
-        print("Valgrind not available")
+    except Exception as e:
+        print(f"Error in leak check: {e}")
 else:
     print("No tests passed")
 
