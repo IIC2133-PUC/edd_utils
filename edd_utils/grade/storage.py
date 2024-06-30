@@ -1,17 +1,15 @@
-from typing import Callable
 import csv
 from pathlib import Path
 
 from contextlib import contextmanager
-from .test import Test
+from ..tests import Test
+from .types import GetColumnNames
 
 
 class GraderStorage:
     "TSV storage for grader results"
 
-    def __init__(
-        self, storage_path: Path, tests: list[Test], get_columns_names: Callable[[list[str]], list[str]]
-    ) -> None:
+    def __init__(self, storage_path: Path, tests: list[Test], get_columns_names: GetColumnNames) -> None:
         self.storage_path = storage_path
         self.tests = tests
         self.get_columns_names = get_columns_names

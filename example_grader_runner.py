@@ -2,10 +2,18 @@ from pathlib import Path
 import subprocess
 from subprocess import DEVNULL
 
-from edd_utils.grader import Grader, GraderConfig
-from edd_utils.runner import InputOutputRunner, ResultOk, ResultError, check_leaks_and_memory_errors
+from edd_utils.grade import Grader, GraderConfig, Submission
+from edd_utils.run import InputOutputRunner, ResultOk, ResultError, check_leaks_and_memory_errors
+from edd_utils.tests import Test
 
-# COnfiguración del semestre
+
+def fill(submission: Submission, tests: list[Test], *, error: str):
+    for test in tests:
+        submission.save_result(f"{test} resultado", "0")
+        submission.save_result(f"{test} puntaje", "0")
+
+
+# Configuración del semestre
 
 
 def get_columns_names(tests: list[str]):
@@ -57,8 +65,17 @@ for submission in grader.submissions:
 
     last_test_that_worked = None
 
-    submission.clone_or_pull()
-    compile(submission.repo_path, optimize=False)
+    try:
+        submission.clone_or_pull()
+    except Exception as e:
+        print(f"Error al clonar/pull: {e}")
+        fill(submission, grader.tests, error="CLONE ERROR")
+        continue
+
+    compile_ok = compile(submission.repo_path, optimize=False)
+    if not compile_ok:
+        fill(submission, grader.tests, error="COMPILE ERROR")
+        continue
 
     for test in grader.tests:
         input_path = (test.path / "input.txt").resolve()
@@ -84,5 +101,3 @@ for submission in grader.submissions:
             leaks_ok, mem_ok = valgrind_result
             submission.save_result("ok leaks", int(leaks_ok))
             submission.save_result("ok mem_errors", int(mem_ok))
-
-    submission.save()

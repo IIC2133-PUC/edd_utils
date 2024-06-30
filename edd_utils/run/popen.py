@@ -17,7 +17,7 @@ class PopenWithWait4(subprocess.Popen):
         """Wait for child process to terminate; returns (return_code, resource_usage)."""
         prev_handler = signal.signal(signal.SIGALRM, alarm_timeout_signaled)
 
-        # TODO: change alarm timeout to a a busy loop and pass no-hang option to wait4
+        # TODO: change alarm timeout to a busy loop and pass no-hang option to wait4
 
         try:
             _, self.returncode, resource_usage = os.wait4(self.pid, options)

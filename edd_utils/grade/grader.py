@@ -1,59 +1,30 @@
 from pathlib import Path
-from typing import Callable, TypeAlias
 from dataclasses import dataclass
 import csv
 
-from . import git
-from .types import SupportComparison
-from .test import Test
+from .. import git
+from ..tests import get_tests, StrSortKey
+from .types import GetColumnNames
 from .storage import GraderStorage
-
-StrSortKey: TypeAlias = Callable[[str, str], SupportComparison]
 
 
 @dataclass
 class GraderConfig:
     github_org: str
-    get_columns_names: Callable[[list[str]], list[str]]
-    timeout: int = 10
-    mbs_limit: int = 1024
+    get_columns_names: GetColumnNames
     tests_dir: Path = Path("tests")
     repos_dir: Path = Path("repos")
-
-
-def get_tests(test_dir: Path, test_sorter: StrSortKey | None = None):
-    tests: list[Test] = []
-    for group in test_dir.iterdir():
-        if not group.is_dir():
-            continue
-
-        for test in group.iterdir():
-            if not test.is_dir():
-                continue
-
-            tests.append(Test(test))
-
-    if test_sorter is not None:
-        tests.sort(key=lambda test: test_sorter(test.group, test.name))
-
-    return tests
 
 
 class Grader:
     def __init__(
         self,
-        # tha name of the assignment
         assignment: str,
         dirs_name: str,
-        # a tsv file that contains the usernames and (optional) commit to grade
-        # it should not contain a header
         submissions_path: Path,
         *,
-        # shared configuration for the grader
         config: GraderConfig,
-        # a tsv file where the results will be stored
         storage_path: Path | None = None,
-        # the order of the test cases
         test_sorter: StrSortKey | None = None,
     ) -> None:
         self.assignment = assignment
@@ -79,6 +50,12 @@ class Grader:
     @property
     def repos_path(self):
         return self.config.repos_dir / self.dirs_name
+
+    def iter_submissions(self):
+        "Save the results of each submission after yielding it"
+        for submission in self.submissions:
+            yield submission
+            submission.save()
 
 
 class Submission:
