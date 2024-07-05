@@ -7,6 +7,3 @@ dependencies = []
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-packages = ["edd_utils"]
