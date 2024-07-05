@@ -24,7 +24,7 @@ class PopenWithWait4(subprocess.Popen):
             if timeout is not None:
                 signal.alarm(timeout)
         except (TimeoutError, KeyboardInterrupt):
-            self.kill()
+            self.send_signal(signal.SIGKILL)
             _, self.returncode, resource_usage = os.wait4(self.pid, options)
         finally:
             if timeout is not None:

@@ -1,6 +1,7 @@
 import os
 import resource
 import signal
+from subprocess import DEVNULL
 
 from .results import ResultError, ResultOk, ErrorStatus
 from .popen import PopenWithWait4
@@ -38,7 +39,7 @@ def run_command(
     args: CMD, *, cwd: StrOrBytesPath | None = None, timeout: int | None = None, mbs_limit: int | None = 1024
 ) -> ResultError | ResultOk:
     resource_limiter = ResourceLimiter(timeout, mbs_limit)
-    process = PopenWithWait4(args, cwd=cwd, preexec_fn=resource_limiter)
+    process = PopenWithWait4(args, cwd=cwd, preexec_fn=resource_limiter, stdout=DEVNULL, stderr=DEVNULL)
     status, resource_usage = process.wait4(timeout=timeout)
 
     used_memory_on_mb = resource_usage.ru_maxrss / (resource.getpagesize() * 1024)
