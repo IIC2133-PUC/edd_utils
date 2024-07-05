@@ -1,10 +1,10 @@
 # EDD Utils
 
 ```sh
-# Recomendado usar uv
+# Recomendado usar uv y gh cli
 
 python -m venv .venv
 source .venv/bin/activate
-# ir al directorio donde se clonó este repo
-pip install .
+git clone git@github.com:IIC2133-PUC/edd_utils.git
+pip install -e edd_utils
 ```
