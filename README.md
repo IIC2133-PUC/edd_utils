@@ -1,3 +1,10 @@
 # EDD Utils
 
-TODO: Añadir como instalar esto localmente sin PyPi
+```sh
+# Recomendado usar uv
+
+python -m venv .venv
+source .venv/bin/activate
+# ir al directorio donde se clonó este repo
+pip install .
+```
