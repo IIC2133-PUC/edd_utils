@@ -49,12 +49,6 @@ class Grader:
     def repos_path(self):
         return self.config.repos_dir / self.dirs_name
 
-    def iter_submissions(self):
-        "Save the results of each submission after yielding it"
-        for submission in self.submissions:
-            yield submission
-            submission.save()
-
 
 class Submission:
     def __init__(self, user: str, commit: str | None, *, grader: Grader):

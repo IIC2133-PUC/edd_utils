@@ -53,7 +53,7 @@ grader.load_submissions(Path("submissions.tsv"))
 
 runner = InputOutputRunner(timeout=10, mbs_limit=1024)
 
-for submission in grader.iter_submissions():
+for submission in grader.submissions:
     if submission.is_saved():
         continue
 
@@ -96,3 +96,5 @@ for submission in grader.iter_submissions():
             submission.save_result("ok mem_errors", int(mem_ok))
         except Exception as e:
             print(f"Error al revisar leaks y memory errors de {submission.user}")
+
+    submission.save()
