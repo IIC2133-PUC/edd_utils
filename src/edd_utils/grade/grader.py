@@ -42,7 +42,7 @@ class Grader:
         for row in reader:
             if len(row) == 1:
                 self.submissions.append(Submission(row[0], None, grader=self))
-            else:
+            elif len(row) >= 2:
                 self.submissions.append(Submission(row[0], row[1], grader=self))
 
     @property
@@ -80,6 +80,11 @@ class Submission:
         self.grader.storage.save(self.user, self.results)
 
     def clone_or_pull(self, branch="origin/main", reset=True):
+        """
+        Calls git clone or git pull depending on the existence of the repo,
+        resets the repo to the latest commit if reset is True,
+        and checks out the commit if the submission has a commit.
+        """
         if self.repo_path.is_dir():
             if reset:
                 git.fetch(self.repo_path)

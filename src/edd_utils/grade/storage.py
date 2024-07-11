@@ -32,7 +32,7 @@ class GraderStorage:
                 raise ValueError("Invalid header")
 
             for row in reader:
-                if row[0] == user:
+                if len(row) == 0 and row[0] == user:
                     return True
 
         return False
@@ -45,7 +45,7 @@ class GraderStorage:
             with self.get_reader() as reader:
                 lines: list[list[str]] = list(reader)
                 for i, row in enumerate(lines):
-                    if row[0] == user:
+                    if len(row) == 0 and row[0] == user:
                         lines[i] = col_to_save
                         break
             with self.get_writer("w") as writer:

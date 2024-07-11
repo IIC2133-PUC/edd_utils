@@ -1,5 +1,6 @@
 import os
-import typing
+from typing import TypeAlias, Sequence
 
-StrOrBytesPath: typing.TypeAlias = str | bytes | os.PathLike[str] | os.PathLike[bytes]
-CMD: typing.TypeAlias = typing.Sequence[StrOrBytesPath]
+
+StrOrBytesPath: TypeAlias = str | bytes | os.PathLike[str] | os.PathLike[bytes]
+CMD: TypeAlias = Sequence[StrOrBytesPath]
